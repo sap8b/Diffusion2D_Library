@@ -463,16 +463,6 @@ namespace Diffusion2D_Library
                     for (int j = start_idx2; j < nx_less1; j++)
                     {
                         RVector v1 = C_Ex.GetColVector(j);
-                        if (j < CB.GetRVectorSize)
-                        {
-                            v1[0] = CB[j]; //nu * 
-                            v1[ncols - 1] = CT[j]; //nu * 
-                        }
-                        else
-                        {
-                            v1[0] = CB[1]; //nu * 
-                            v1[ncols - 1] = CT[CT.GetRVectorSize - 1]; //nu * 
-                        }
                         RVector f12s = f12.GetColVector(j);
                         RVector v2, u12;
                         double s = -B_col[j][1, 2];
@@ -495,8 +485,18 @@ namespace Diffusion2D_Library
                         // Bottom neumann, Top dirichlet
                         else if (BCs_Functions[3].TypeBC == ABoundaryCondition.neumann && BCs_Functions[0].TypeBC == ABoundaryCondition.dirichlet)
                         {
+                            if (j < CB.GetRVectorSize)
+                            {
+                                v1[0] = (2 * dy * CB[j] / -3) - (4 / 3 * v1[1]) + (1 / 3 * v1[2]); //nu * 
+                                v1[ncols - 1] = CT[j]; //nu * 
+                            }
+                            else
+                            {
+                                v1[0] = (2 * dy * CB[1] / -3) - (4 / 3 * v1[1]) + (1 / 3 * v1[2]); //nu * 
+                                v1[ncols - 1] = CT[CT.GetRVectorSize - 1]; //nu * 
+                            }
                             v2 = (v1 + f12s).Section(start_idx1, nx_less1);
-                            v2[0] = 2 * s * dx * (v1[0] + f12s[0]) + v1[0] + f12s[0];
+                            v2[0] = 2 * s * dx * (v1[0] + f12s[0]) + v2[0]; //v1[0] + f12s[0]
                             v2[v2.GetRVectorSize - 1] = s * (v1[nx_less1] + f12s[nx_less1]) + v1[nx_less2] + f12s[nx_less2];
 
                             B_col2 = new(v2.GetRVectorSize, v2.GetRVectorSize);
@@ -569,8 +569,8 @@ namespace Diffusion2D_Library
                         RVector v1 = C_Ex.GetRowVector(k);
                         RVector u12 = C_Im1.GetRowVector(k);
                         RVector b = (2 * u12) - v1;
-                        if (k < CL.GetRVectorSize) { b[0] = CL[k]; b[nrows - 1] = CR[k]; }
-                        else { b[0] = CL[1]; b[nrows - 1] = CR[CR.GetRVectorSize - 1]; }
+                        //if (k < CL.GetRVectorSize) { b[0] = CL[k]; b[nrows - 1] = CR[k]; }
+                        //else { b[0] = CL[1]; b[nrows - 1] = CR[CR.GetRVectorSize - 1]; }
 
                         RVector b2, u1;
                         double s = -B_row[k][1, 2];
@@ -607,12 +607,12 @@ namespace Diffusion2D_Library
                             //b2[b2.GetRVectorSize - 1] = s * b[nx_less1];
                             if (k < CL.GetRVectorSize)
                             {
-                                b2[0] = 2 * s * dx * CL[k] + b[1];
+                                b2[0] = 2 * s * dx * CL[k] + b[0];
                                 b2[b2.GetRVectorSize - 1] = s * CR[k] + b[b.GetRVectorSize - 1];
                             }
                             else
                             {
-                                b2[0] = 2 * s * dx * CL[1] + b[1];
+                                b2[0] = 2 * s * dx * CL[1] + b[0];
                                 b2[b2.GetRVectorSize - 1] = s * CR[CR.GetRVectorSize - 1] + b[b.GetRVectorSize - 1];
                             }
 
@@ -638,12 +638,12 @@ namespace Diffusion2D_Library
                             if (k < CL.GetRVectorSize)
                             {
                                 b2[0] = s * b[0] + b[0];
-                                b2[b2.GetRVectorSize - 1] = 2 * s * dx * CR[k] + b[b.GetRVectorSize - 2];
+                                b2[b2.GetRVectorSize - 1] = 2 * s * dx * CR[k] + b[b.GetRVectorSize - 1];
                             }
                             else
                             {
                                 b2[0] = s * b[1] + b[0];
-                                b2[b2.GetRVectorSize - 1] = 2 * s * dx * CR[CR.GetRVectorSize - 1] + b[b.GetRVectorSize - 2];
+                                b2[b2.GetRVectorSize - 1] = 2 * s * dx * CR[CR.GetRVectorSize - 1] + b[b.GetRVectorSize - 1];
                             }
 
                             B_row2 = new(b2.GetRVectorSize, b2.GetRVectorSize);
@@ -662,16 +662,25 @@ namespace Diffusion2D_Library
                         // Left neumann, Right neumann
                         else
                         {
-                            b2 = b;
+                            b2 = new RVector(b.GetRVectorSize);
+                            for (int kk = 0; kk < b.GetRVectorSize-1; kk++) { b2[kk] = b[kk]; }
+                            
                             if (k < CL.GetRVectorSize)
                             {
-                                b2[0] = 2 * s * dx * CL[k] + b[1];
-                                b2[b2.GetRVectorSize - 1] = 2 * s * dx * CR[k] + b[b.GetRVectorSize - 2];
+                                b[0] = (2 * dx * CL[k] / -3) - (4 / 3 * b[1]) + (1 / 3 * b[2]);
+                                b[b.GetRVectorSize - 1] = (2 * dx * CR[k] / -3) - (4 / 3 * b[b.GetRVectorSize - 2]) + (1 / 3 * b[b.GetRVectorSize - 3]);
+                                b2[0] = s * b[0]; // 2 * s * dx * CL[k] + b[0]; // 
+                                b2[b2.GetRVectorSize - 1] = s * b[b.GetRVectorSize - 1];  //2 * s * dx * CR[k] + b[b.GetRVectorSize - 1]; // 
                             }
                             else
                             {
-                                b2[0] = 2 * s * dx * CL[1] + b[1];
-                                b2[b2.GetRVectorSize - 1] = 2 * s * dx * CR[CR.GetRVectorSize - 1] + b[b.GetRVectorSize - 2];
+                                b[0] = (2 * dx * CL[1] / -3) - (4 / 3 * b[1]) + (1 / 3 * b[2]);
+                                b[b.GetRVectorSize - 1] = (2 * dx * CR[CR.GetRVectorSize - 1] / -3) - (4 / 3 * b[b.GetRVectorSize - 2]) + (1 / 3 * b[b.GetRVectorSize - 3]);
+                                b2[0] = s * b[0]; // 2 * s * dx * CL[k] + b[0]; // 
+                                b2[b2.GetRVectorSize - 1] = s * b[b.GetRVectorSize - 1];  //2 * s * dx * CR[k] + b[b.GetRVectorSize - 1]; //
+
+                                //b2[0] = 2 * s * dx * CL[1] + b[1]; // 
+                                //b2[b2.GetRVectorSize - 1] = 2 * s * dx * CR[CR.GetRVectorSize - 1] + b[b.GetRVectorSize - 1]; // 
                             }
 
 
