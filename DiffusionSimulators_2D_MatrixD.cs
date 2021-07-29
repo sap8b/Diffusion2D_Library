@@ -412,6 +412,7 @@ namespace Diffusion2D_Library
                         RVector v1 = A[i].Dot(xold);
                         C_Ex.ReplaceRow(v1, i, start_idx2, nx_less1);
 
+                        // Left BCs
                         switch (BCs_Functions[2].TypeBC)
                         {
                             case ABoundaryCondition.dirichlet:
@@ -419,10 +420,17 @@ namespace Diffusion2D_Library
                                 C_Ex[i, start_idx2] = C_Ex[i, start_idx2] + (-(NeumannBCs_L_A[i] - 1)) * CL[i];
                                 break;
                             case ABoundaryCondition.neumann:
-                                C_Ex[i, start_idx2] = C_Ex[i, start_idx2] + (-(NeumannBCs_L_A[i] - 1)) * dx * CL[i];
-                                C_Ex[i, start_idx1] = C_Ex[i, start_idx2];
+                                //C_Ex[i, start_idx2] = C_Ex[i, start_idx2] + (-(NeumannBCs_L_A[i] - 1)) * dx * CL[i];
+                                //C_Ex[i, start_idx1] = C_Ex[i, start_idx2];
+                                double c1 = 48 * C_Ex[i, 1];
+                                double c2 = 36 * C_Ex[i, 2];
+                                double c3 = 16 * C_Ex[i, 3];
+                                double c4 = 3 * C_Ex[i, 4];
+                                double avalue = 12 * dx * CL[i] - c1 + c2 + c3 - c4;
+                                C_Ex[i, start_idx1] = -1 / 25 * avalue;
                                 break;
                         }
+                        // Right BCs
                         switch (BCs_Functions[1].TypeBC)
                         {
                             case ABoundaryCondition.dirichlet:
@@ -430,8 +438,14 @@ namespace Diffusion2D_Library
                                 C_Ex[i, nx_less2] = C_Ex[i, nx_less2] + (-(NeumannBCs_R_A[i] - 1)) * CR[i];
                                 break;
                             case ABoundaryCondition.neumann:
-                                C_Ex[i, nx_less2] = C_Ex[i, nx_less2] + (-(NeumannBCs_R_A[i] - 1)) * dx * CR[i];
-                                C_Ex[i, nx_less1] = C_Ex[i, nx_less2];
+                                //C_Ex[i, nx_less2] = C_Ex[i, nx_less2] + (-(NeumannBCs_R_A[i] - 1)) * dx * CR[i];
+                                //C_Ex[i, nx_less1] = C_Ex[i, nx_less2];
+                                double c1 = 48 * C_Ex[i, C_Ex.GetnCols - 1 - 1];
+                                double c2 = 36 * C_Ex[i, C_Ex.GetnCols - 1 - 2];
+                                double c3 = 16 * C_Ex[i, C_Ex.GetnCols - 1 - 3];
+                                double c4 = 3 * C_Ex[i, C_Ex.GetnCols - 1 - 4];
+                                double avalue = 12 * dx * CR[i] - c1 + c2 + c3 - c4;
+                                C_Ex[i, C_Ex.GetnCols - 1] = -1 / 25 * avalue;
                                 break;
                         }
 
@@ -476,9 +490,9 @@ namespace Diffusion2D_Library
                             B_col2 = B_col[j];
 
                             u12 = TridiagonalMatrix.Thomas_Algorithm(B_col2, v2);
-
                             int ns = (nrows - 1) - u12.GetRVectorSize;
                             C_Im1.ReplaceCol(u12, j, ns, u12.GetRVectorSize + 1);
+
                             if (j < CB.GetRVectorSize) { C_Im1[0, j] = CB[j]; C_Im1[nrows - 1, j] = CT[j]; }
                             else { C_Im1[0, j] = CB[1]; C_Im1[nrows - 1, j] = CT[CT.GetRVectorSize - 1]; }
                         }
@@ -699,10 +713,25 @@ namespace Diffusion2D_Library
 
                             int ns = start_idx1;
                             C_Im2.ReplaceRow(u1, k, ns, u1.GetRVectorSize);
+
+                            // Apply the BCs to the left and right sides
+                            double c1 = 48 * C_Im2[k, 1];
+                            double c2 = 36 * C_Im2[k, 2];
+                            double c3 = 16 * C_Im2[k, 3];
+                            double c4 = 3 * C_Im2[k, 4];
+                            double avalue = 12 * dx * CL[k] - c1 + c2 + c3 - c4;
+                            C_Im2[k, start_idx1] = -1 / 25 * avalue;
+
+                            c1 = 48 * C_Im2[k, C_Im2.GetnCols - 1 - 1];
+                            c2 = 36 * C_Im2[k, C_Im2.GetnCols - 1 - 2];
+                            c3 = 16 * C_Im2[k, C_Im2.GetnCols - 1 - 3];
+                            c4 = 3 * C_Im2[k, C_Im2.GetnCols - 1 - 4];
+                            avalue = 12 * dx * CR[k] - c1 + c2 + c3 - c4;
+                            C_Im2[k, C_Im2.GetnCols - 1] = -1 / 25 * avalue;
                         }
                     }
                     // ===================
-                    // Set boundary conditions on the C_Im2 matrix
+                    // Set top and bottom boundary conditions on the C_Im2 matrix
                     // ===================
                     switch (BCs_Functions[0].TypeBC)
                     {

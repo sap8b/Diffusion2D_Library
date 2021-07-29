@@ -1,12 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 using static Diffusion2D_Library.BoundaryCondition;
-using static Diffusion2D_Library.DiffusionSimulators_1D;
 
 namespace Diffusion2D_Library
 {
