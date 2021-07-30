@@ -81,151 +81,6 @@ namespace Diffusion2D_Library
                     cf_2D.DValues[j, i] = D[j, i];
                 }
             }
-            // ====================================
-            // Create the solver method matrices
-            // ====================================
-            nx_less1 = NX - 1;
-            // Total points minus the left/right or up/down boundaries
-            nx_less2 = NX - 2;
-            // nx_less1 - one point because the total entries are one fewer because these are on the off-diagonals
-            nx_less3 = nx_less2 - 1;
-
-            end_idx1 = nx_less3;
-            end_idx2 = nx_less3 - 1;
-            start_idx1 = 0;
-            start_idx2 = 1;
-
-            A_explicit = new TridiagonalMatrix[nx];
-            B_row = new TridiagonalMatrix[nx];
-            B_col = new TridiagonalMatrix[nx];
-            NeumannBCs_L_A = new double[nx];
-            NeumannBCs_R_A = new double[nx];
-
-            double nu0 = dt / (2 * Math.Pow(dx, 2));
-
-            RVector nu = new(nx_less2);
-            RVector off_d_val_l0 = new(nx_less3);
-            RVector off_d_val_u0 = new(nx_less3);
-            RVector main0 = new(nx_less2);
-            RVector off_d_val_l1 = new(nx_less3);
-            RVector off_d_val_u1 = new(nx_less3);
-            RVector main1 = new(nx_less2);
-            RVector off_d_val_l2 = new(nx_less3);
-            RVector off_d_val_u2 = new(nx_less3);
-            RVector main2 = new(nx_less2);
-
-            double D_minus, D_plus;
-            for (int i = start_idx1; i < NX; i++)
-            {
-                RVector D_row = D.GetRowVector(i);
-                double D0 = D_row[start_idx1];
-                double D1 = D_row[start_idx2];
-                double Dend = D_row[nx_less1];
-                double Dend1 = D_row[nx_less2];
-
-                // Working this for diffusion heterogeneous media
-                //================================================
-                // A Matrix first
-                //================================================
-                #region A
-                D_plus = 0.5 * (D1 + D0);
-                main0[start_idx1] = 1.0 - 2.0 * D_plus * nu0;
-                NeumannBCs_L_A[i] = 1.0 - D_plus * nu0;
-
-                D_minus = 0.5 * (Dend1 + Dend);
-                main0[end_idx1] = 1.0 - 2.0 * D_minus * nu0;
-                NeumannBCs_R_A[i] = 1.0 - D_minus * nu0;
-
-                for (int j = start_idx2; j < end_idx1; j++)
-                {
-                    D_minus = 0.5 * (D_row[j - 1] + D_row[j]);
-                    D_plus = 0.5 * (D_row[j + 1] + D_row[j]);
-                    main0[j] = 1.0 - ((D_minus * nu0) + (D_plus * nu0));
-                }
-
-                for (int j = start_idx2; j < end_idx1 + 1; j++)
-                {
-                    D_minus = 0.5 * (D_row[j] + D_row[j - 1]);
-                    off_d_val_l0[j - 1] = nu0 * D_minus;
-                }
-
-                for (int j = start_idx1; j < end_idx1; j++)
-                {
-                    D_plus = 0.5 * (D_row[j + 1] + D_row[j]);
-                    off_d_val_u0[j] = nu0 * D_plus;
-                }
-
-                A_explicit[i] = new TridiagonalMatrix(main0, off_d_val_l0, off_d_val_u0);
-                #endregion
-                ////================================================
-                //// The B-row Matrix next
-                ////================================================
-                #region B_row
-                D_plus = 0.5 * (D1 + D0);
-                main1[start_idx1] = 1.0 + 2.0 * D_plus * nu0;
-
-                D_minus = 0.5 * (Dend1 + Dend);
-                main1[end_idx1] = 1.0 + 2.0 * D_minus * nu0;
-
-                for (int j = start_idx2; j < end_idx1; j++)
-                {
-                    D_minus = 0.5 * (D_row[j - 1] + D_row[j]);
-                    D_plus = 0.5 * (D_row[j + 1] + D_row[j]);
-                    main1[j] = 1.0 + ((D_minus * nu0) + (D_plus * nu0));
-                }
-
-                for (int j = start_idx2; j < end_idx1 + 1; j++)
-                {
-                    D_minus = 0.5 * (D_row[j - 1] + D_row[j]);
-                    off_d_val_l1[j - 1] = -nu0 * D_minus;
-                }
-
-                for (int j = start_idx1; j < end_idx1; j++)
-                {
-                    D_plus = 0.5 * (D_row[j + 1] + D_row[j]);
-                    off_d_val_u1[j] = -nu0 * D_plus;
-                }
-
-                B_row[i] = new TridiagonalMatrix(main1, off_d_val_l1, off_d_val_u1);
-                #endregion
-                ////================================================
-                //// The B-column Matrix last
-                ////================================================
-                #region B_col
-                RVector D_col = D.GetColVector(i);
-                D0 = D_col[0];
-                D1 = D_col[1];
-                Dend = D_col[nx - 1];
-                Dend1 = D_col[nx - 2];
-
-                D_plus = 0.5 * (D1 + D0);
-                main2[start_idx1] = 1.0 + 2.0 * D_plus * nu0;
-
-                D_minus = 0.5 * (Dend1 + Dend);
-                main2[end_idx1] = 1.0 + 2.0 * D_minus * nu0;
-
-                for (int j = start_idx2; j < end_idx1; j++)
-                {
-                    D_minus = 0.5 * (D_col[j - 1] + D_col[j]);
-                    D_plus = 0.5 * (D_col[j + 1] + D_col[j]);
-                    main2[j] = 1.0 + ((D_minus * nu0) + (D_plus * nu0));
-                }
-
-                for (int j = start_idx2; j < end_idx1 + 1; j++)
-                {
-                    D_minus = 0.5 * (D_col[j - 1] + D_col[j]);
-                    off_d_val_l2[j - 1] = -nu0 * D_minus;
-                }
-
-                for (int j = start_idx1; j < end_idx1; j++)
-                {
-                    D_plus = 0.5 * (D_col[j + 1] + D_col[j]);
-                    off_d_val_u2[j] = -nu0 * D_plus;
-                }
-
-                B_col[i] = new TridiagonalMatrix(main2, off_d_val_l2, off_d_val_u2);
-                #endregion
-            }
 
             // ====================================
             // Set-up the initial condition function and start establishing the initial composition field
@@ -337,6 +192,152 @@ namespace Diffusion2D_Library
                         break;
                 }
             }
+            // ====================================
+            // Create the solver method matrices
+            // ====================================
+            nx_less1 = NX - 1;
+            // Total points minus the left/right or up/down boundaries
+            nx_less2 = NX - 2;
+            // nx_less1 - one point because the total entries are one fewer because these are on the off-diagonals
+            nx_less3 = nx_less2 - 1;
+
+            end_idx1 = nx_less3;
+            end_idx2 = nx_less3 - 1;
+            start_idx1 = 0;
+            start_idx2 = 1;
+
+            A_explicit = new TridiagonalMatrix[nx];
+            B_row = new TridiagonalMatrix[nx];
+            B_col = new TridiagonalMatrix[nx];
+
+            NeumannBCs_L_A = new double[nx];
+            NeumannBCs_R_A = new double[nx];
+
+            double nu0 = dt / (2 * Math.Pow(dx, 2));
+
+            RVector nu = new(nx_less2);
+            RVector off_d_val_l0 = new(nx_less3);
+            RVector off_d_val_u0 = new(nx_less3);
+            RVector main0 = new(nx_less2);
+            RVector off_d_val_l1 = new(nx_less3);
+            RVector off_d_val_u1 = new(nx_less3);
+            RVector main1 = new(nx_less2);
+            RVector off_d_val_l2 = new(nx_less3);
+            RVector off_d_val_u2 = new(nx_less3);
+            RVector main2 = new(nx_less2);
+
+            double D_minus, D_plus;
+            for (int i = start_idx1; i < NX; i++)
+            {
+                RVector D_row = D.GetRowVector(i);
+                double D0 = D_row[start_idx1];
+                double D1 = D_row[start_idx2];
+                double Dend = D_row[nx_less1];
+                double Dend1 = D_row[nx_less2];
+
+                // Working this for diffusion heterogeneous media
+                //================================================
+                // A Matrix first
+                //================================================
+                #region A_explicit
+                D_plus = 0.5 * (D1 + D0);
+                main0[start_idx1] = 1.0 - 2.0 * D_plus * nu0;
+                NeumannBCs_L_A[i] = 1.0 - D_plus * nu0;
+
+                D_minus = 0.5 * (Dend1 + Dend);
+                main0[end_idx1] = 1.0 - 2.0 * D_minus * nu0;
+                NeumannBCs_R_A[i] = 1.0 - D_minus * nu0;
+
+                for (int j = start_idx2; j < end_idx1; j++)
+                {
+                    D_minus = 0.5 * (D_row[j - 1] + D_row[j]);
+                    D_plus = 0.5 * (D_row[j + 1] + D_row[j]);
+                    main0[j] = 1.0 - ((D_minus * nu0) + (D_plus * nu0));
+                }
+
+                for (int j = start_idx2; j < end_idx1 + 1; j++)
+                {
+                    D_minus = 0.5 * (D_row[j] + D_row[j - 1]);
+                    off_d_val_l0[j - 1] = nu0 * D_minus;
+                }
+
+                for (int j = start_idx1; j < end_idx1; j++)
+                {
+                    D_plus = 0.5 * (D_row[j + 1] + D_row[j]);
+                    off_d_val_u0[j] = nu0 * D_plus;
+                }
+
+                A_explicit[i] = new TridiagonalMatrix(main0, off_d_val_l0, off_d_val_u0);
+                #endregion
+                ////================================================
+                //// The B-row Matrix next
+                ////================================================
+                #region B_row
+                D_plus = 0.5 * (D1 + D0);
+                main1[start_idx1] = 1.0 + 2.0 * D_plus * nu0;
+
+                D_minus = 0.5 * (Dend1 + Dend);
+                main1[end_idx1] = 1.0 + 2.0 * D_minus * nu0;
+
+                for (int j = start_idx2; j < end_idx1; j++)
+                {
+                    D_minus = 0.5 * (D_row[j - 1] + D_row[j]);
+                    D_plus = 0.5 * (D_row[j + 1] + D_row[j]);
+                    main1[j] = 1.0 + ((D_minus * nu0) + (D_plus * nu0));
+                }
+
+                for (int j = start_idx2; j < end_idx1 + 1; j++)
+                {
+                    D_minus = 0.5 * (D_row[j - 1] + D_row[j]);
+                    off_d_val_l1[j - 1] = -nu0 * D_minus;
+                }
+
+                for (int j = start_idx1; j < end_idx1; j++)
+                {
+                    D_plus = 0.5 * (D_row[j + 1] + D_row[j]);
+                    off_d_val_u1[j] = -nu0 * D_plus;
+                }
+
+                B_row[i] = new TridiagonalMatrix(main1, off_d_val_l1, off_d_val_u1);
+                #endregion
+                ////================================================
+                //// The B-column Matrix last
+                ////================================================
+                #region B_col
+                RVector D_col = D.GetColVector(i);
+                D0 = D_col[0];
+                D1 = D_col[1];
+                Dend = D_col[nx - 1];
+                Dend1 = D_col[nx - 2];
+
+                D_plus = 0.5 * (D1 + D0);
+                main2[start_idx1] = 1.0 + 2.0 * D_plus * nu0;
+
+                D_minus = 0.5 * (Dend1 + Dend);
+                main2[end_idx1] = 1.0 + 2.0 * D_minus * nu0;
+
+                for (int j = start_idx2; j < end_idx1; j++)
+                {
+                    D_minus = 0.5 * (D_col[j - 1] + D_col[j]);
+                    D_plus = 0.5 * (D_col[j + 1] + D_col[j]);
+                    main2[j] = 1.0 + ((D_minus * nu0) + (D_plus * nu0));
+                }
+
+                for (int j = start_idx2; j < end_idx1 + 1; j++)
+                {
+                    D_minus = 0.5 * (D_col[j - 1] + D_col[j]);
+                    off_d_val_l2[j - 1] = -nu0 * D_minus;
+                }
+
+                for (int j = start_idx1; j < end_idx1; j++)
+                {
+                    D_plus = 0.5 * (D_col[j + 1] + D_col[j]);
+                    off_d_val_u2[j] = -nu0 * D_plus;
+                }
+
+                B_col[i] = new TridiagonalMatrix(main2, off_d_val_l2, off_d_val_u2);
+                #endregion
+            }
 
             gxt_function = g;
             Chat_mode = Tmode;
@@ -407,6 +408,7 @@ namespace Diffusion2D_Library
                         RVector xold;
                         if (t == 0) { xold = C_Initial.GetRowVector(i, start_idx2, nx_less1); }
                         else { xold = C_Im2.GetRowVector(i, start_idx2, nx_less1); }
+
                         if (BCs_Functions[2].TypeBC == ABoundaryCondition.neumann) { holdA0 = A_explicit[i][start_idx1, start_idx1]; A_explicit[i][start_idx1, start_idx1] = NeumannBCs_L_A[i]; }
                         if (BCs_Functions[1].TypeBC == ABoundaryCondition.neumann) { holdA1 = A_explicit[i][end_idx1, end_idx1]; A_explicit[i][end_idx1, end_idx1] = NeumannBCs_R_A[i]; }
 
