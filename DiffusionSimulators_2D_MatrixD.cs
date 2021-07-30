@@ -16,7 +16,8 @@ namespace Diffusion2D_Library
    public class DiffusionSimulators_2D_MatrixD : DiffusionSimulator2D 
     {
         // Fields
-        private readonly TridiagonalMatrix[] A;
+        private readonly TridiagonalMatrix[] A_explicit;
+        private readonly TridiagonalMatrix[] A_implicit;
         private readonly TridiagonalMatrix[] B_row;
         private readonly TridiagonalMatrix[] B_col;
         private double[] NeumannBCs_L_A;
@@ -94,7 +95,7 @@ namespace Diffusion2D_Library
             start_idx1 = 0;
             start_idx2 = 1;
 
-            A = new TridiagonalMatrix[nx];
+            A_explicit = new TridiagonalMatrix[nx];
             B_row = new TridiagonalMatrix[nx];
             B_col = new TridiagonalMatrix[nx];
             NeumannBCs_L_A = new double[nx];
@@ -154,7 +155,7 @@ namespace Diffusion2D_Library
                     off_d_val_u0[j] = nu0 * D_plus;
                 }
 
-                A[i] = new TridiagonalMatrix(main0, off_d_val_l0, off_d_val_u0);
+                A_explicit[i] = new TridiagonalMatrix(main0, off_d_val_l0, off_d_val_u0);
                 #endregion
                 ////================================================
                 //// The B-row Matrix next
@@ -406,10 +407,10 @@ namespace Diffusion2D_Library
                         RVector xold;
                         if (t == 0) { xold = C_Initial.GetRowVector(i, start_idx2, nx_less1); }
                         else { xold = C_Im2.GetRowVector(i, start_idx2, nx_less1); }
-                        if (BCs_Functions[2].TypeBC == ABoundaryCondition.neumann) { holdA0 = A[i][start_idx1, start_idx1]; A[i][start_idx1, start_idx1] = NeumannBCs_L_A[i]; }
-                        if (BCs_Functions[1].TypeBC == ABoundaryCondition.neumann) { holdA1 = A[i][end_idx1, end_idx1]; A[i][end_idx1, end_idx1] = NeumannBCs_R_A[i]; }
+                        if (BCs_Functions[2].TypeBC == ABoundaryCondition.neumann) { holdA0 = A_explicit[i][start_idx1, start_idx1]; A_explicit[i][start_idx1, start_idx1] = NeumannBCs_L_A[i]; }
+                        if (BCs_Functions[1].TypeBC == ABoundaryCondition.neumann) { holdA1 = A_explicit[i][end_idx1, end_idx1]; A_explicit[i][end_idx1, end_idx1] = NeumannBCs_R_A[i]; }
 
-                        RVector v1 = A[i].Dot(xold);
+                        RVector v1 = A_explicit[i].Dot(xold);
                         C_Ex.ReplaceRow(v1, i, start_idx2, nx_less1);
 
                         // Left BCs
@@ -449,8 +450,8 @@ namespace Diffusion2D_Library
                                 break;
                         }
 
-                        if (BCs_Functions[2].TypeBC == ABoundaryCondition.neumann) { A[i][start_idx1, start_idx1] = holdA0; }
-                        if (BCs_Functions[1].TypeBC == ABoundaryCondition.neumann) { A[i][end_idx1, end_idx1] = holdA1; }
+                        if (BCs_Functions[2].TypeBC == ABoundaryCondition.neumann) { A_explicit[i][start_idx1, start_idx1] = holdA0; }
+                        if (BCs_Functions[1].TypeBC == ABoundaryCondition.neumann) { A_explicit[i][end_idx1, end_idx1] = holdA1; }
                     }
                     // ===================
                     // ===================
@@ -467,11 +468,11 @@ namespace Diffusion2D_Library
                     RVector gn, g0;
                     gn = BCs_Functions[0].BoundaryFunction((t + 1) * dt, BCs_Functions[0].PositionVaries, BCs_Functions[0].PositionFixed);
                     g0 = BCs_Functions[0].BoundaryFunction(t * dt, BCs_Functions[0].PositionVaries, BCs_Functions[0].PositionFixed);
-                    CT = (0.5 * B_row[nx_less1].Dot(gn.Section(start_idx2, nx_less1))) + (0.5 * A[nx_less1].Dot(g0.Section(start_idx2, nx_less1)));
+                    CT = (0.5 * B_row[nx_less1].Dot(gn.Section(start_idx2, nx_less1))) + (0.5 * A_explicit[nx_less1].Dot(g0.Section(start_idx2, nx_less1)));
 
                     gn = BCs_Functions[3].BoundaryFunction((t + 1) * dt, BCs_Functions[3].PositionVaries, BCs_Functions[3].PositionFixed);
                     g0 = BCs_Functions[3].BoundaryFunction(t * dt, BCs_Functions[3].PositionVaries, BCs_Functions[3].PositionFixed);
-                    CB = (0.5 * B_row[start_idx1].Dot(gn.Section(start_idx2, nx_less1))) + (0.5 * A[start_idx1].Dot(g0.Section(start_idx2, nx_less1)));
+                    CB = (0.5 * B_row[start_idx1].Dot(gn.Section(start_idx2, nx_less1))) + (0.5 * A_explicit[start_idx1].Dot(g0.Section(start_idx2, nx_less1)));
 
                     TridiagonalMatrix B_col2;
                     for (int j = start_idx2; j < nx_less1; j++)
