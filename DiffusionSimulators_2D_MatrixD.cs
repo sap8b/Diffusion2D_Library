@@ -719,15 +719,15 @@ namespace Diffusion2D_Library
                             double c2 = 36 * C_Im2[k, 2];
                             double c3 = 16 * C_Im2[k, 3];
                             double c4 = 3 * C_Im2[k, 4];
-                            double avalue = 12 * dx * CL[k] - c1 + c2 + c3 - c4;
-                            C_Im2[k, start_idx1] = -1 / 25 * avalue;
+                            double avalue = 12 * dx * CL[k] - c1 + c2 - c3 + c4;
+                            C_Im2[k, start_idx1] = (-1.0 / 25.0) * avalue;
 
                             c1 = 48 * C_Im2[k, C_Im2.GetnCols - 1 - 1];
                             c2 = 36 * C_Im2[k, C_Im2.GetnCols - 1 - 2];
                             c3 = 16 * C_Im2[k, C_Im2.GetnCols - 1 - 3];
                             c4 = 3 * C_Im2[k, C_Im2.GetnCols - 1 - 4];
-                            avalue = 12 * dx * CR[k] - c1 + c2 + c3 - c4;
-                            C_Im2[k, C_Im2.GetnCols - 1] = -1 / 25 * avalue;
+                            avalue = 12 * dx * CR[k] - c1 + c2 - c3 + c4;
+                            C_Im2[k, C_Im2.GetnCols - 1] = (-1.0 / 25.0) * avalue;
                         }
                     }
                     // ===================
@@ -752,10 +752,24 @@ namespace Diffusion2D_Library
                             C_Im2.ReplaceRow(CB, 0);
                             break;
                         case ABoundaryCondition.neumann:
-                            CT = C_Im2.GetRowVector(1);
+                            //CT = C_Im2.GetRowVector(1);
                             CB = BCs_Functions[3].BoundaryFunction(t * dt, BCs_Functions[3].PositionVaries, BCs_Functions[3].PositionFixed);
 
-                            C_Im2.ReplaceRow(CB * 2 * dy + CT, 0);
+                            //RVector c1 = 48 * C_Im2.GetRowVector(1);
+                            //RVector c2 = 36 * C_Im2.GetRowVector(2);
+                            //RVector c3 = 16 * C_Im2.GetRowVector(3);
+                            //RVector c4 = 3 * C_Im2.GetRowVector(4);
+                            //RVector avalue = (12 * dy * CB) - c1 + c2 - c3 + c4;
+                            //C_Im2.ReplaceRow((-1.0 / 25.0) * avalue, 0);
+
+                            //RVector c1 = 2 * C_Im2.GetRowVector(1);
+                            //RVector c2 = 0.5 * C_Im2.GetRowVector(2);
+                            //RVector avalue = (dy * CB) - c1 + c2;
+                            //C_Im2.ReplaceRow((-2.0 / 3.0) * avalue, 0);
+
+                            RVector c1 = C_Im2.GetRowVector(1) * 1.0e-4;
+                            C_Im2.ReplaceRow(c1, 0);
+
                             break;
                     }
                     // ===================
