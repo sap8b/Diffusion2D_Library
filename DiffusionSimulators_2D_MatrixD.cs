@@ -117,7 +117,7 @@ namespace Diffusion2D_Library
                             border_with_function[i].PositionFixed = Y[X.GetnRows - 1, 0];
                             C0 = border_with_function[i].BoundaryFunction(0.0, border_with_function[i].PositionVaries, border_with_function[i].PositionFixed);
 
-                            RVector Ctab = C_Initial.GetRowVector(ny - 2) + C0;
+                            RVector Ctab = C_Initial.GetRowVector(ny - 1) + C0;
                             C_Initial.ReplaceRow(Ctab, ny - 1);
                         }
                         else if (border_with_function[i].TypeBC == ABoundaryCondition.neumann)
@@ -126,7 +126,7 @@ namespace Diffusion2D_Library
                             border_with_function[i].PositionFixed = Y[X.GetnRows - 1, 0];
                             C0 = border_with_function[i].BoundaryFunction(0.0, border_with_function[i].PositionVaries, border_with_function[i].PositionFixed);
 
-                            RVector Ctab = C_Initial.GetRowVector(ny - 2) + C0;
+                            RVector Ctab = C_Initial.GetRowVector(ny - 1) + C0;
                             C_Initial.ReplaceRow(Ctab, ny - 1);
                         }
                         break;
@@ -137,7 +137,7 @@ namespace Diffusion2D_Library
                             border_with_function[i].PositionFixed = X[0, Y.GetnCols - 1];
                             C0 = border_with_function[i].BoundaryFunction(0.0, border_with_function[i].PositionVaries, border_with_function[i].PositionFixed);
 
-                            RVector Ctab = C_Initial.GetColVector(nx - 2) + C0;
+                            RVector Ctab = C_Initial.GetColVector(nx - 1) + C0;
                             C_Initial.ReplaceCol(Ctab, nx - 1);
                         }
                         else if (border_with_function[i].TypeBC == ABoundaryCondition.neumann)
@@ -146,7 +146,7 @@ namespace Diffusion2D_Library
                             border_with_function[i].PositionFixed = X[0, Y.GetnCols - 1];
                             C0 = border_with_function[i].BoundaryFunction(0.0, border_with_function[i].PositionVaries, border_with_function[i].PositionFixed);
 
-                            RVector Ctab = C_Initial.GetColVector(nx - 2) + C0;
+                            RVector Ctab = C_Initial.GetColVector(nx - 1) + C0;
                             C_Initial.ReplaceCol(Ctab, nx - 1);
                         }
                         break;
@@ -157,7 +157,7 @@ namespace Diffusion2D_Library
                             border_with_function[i].PositionFixed = X[0, 0];
                             C0 = border_with_function[i].BoundaryFunction(0.0, border_with_function[i].PositionVaries, border_with_function[i].PositionFixed);
 
-                            RVector Ctab = C_Initial.GetColVector(1) + C0;
+                            RVector Ctab = C_Initial.GetColVector(0) + C0;
                             C_Initial.ReplaceCol(Ctab, 0);
                         }
                         else if (border_with_function[i].TypeBC == ABoundaryCondition.neumann)
@@ -166,8 +166,8 @@ namespace Diffusion2D_Library
                             border_with_function[i].PositionFixed = X[0, 0];
                             C0 = border_with_function[i].BoundaryFunction(0.0, border_with_function[i].PositionVaries, border_with_function[i].PositionFixed);
 
-                            RVector Ctab = C_Initial.GetColVector(1) + C0;
-                            C_Initial.ReplaceCol(C0, 0);
+                            RVector Ctab = C_Initial.GetColVector(0) + C0;
+                            C_Initial.ReplaceCol(Ctab, 0);
                         }
                         break;
                     case BoundingBox.bottom:
@@ -177,7 +177,7 @@ namespace Diffusion2D_Library
                             border_with_function[i].PositionFixed = Y[0, 0];
                             C0 = border_with_function[i].BoundaryFunction(0.0, border_with_function[i].PositionVaries, border_with_function[i].PositionFixed);
 
-                            RVector Ctab = C_Initial.GetRowVector(1) + C0;
+                            RVector Ctab = C_Initial.GetRowVector(0) + C0;
                             C_Initial.ReplaceRow(Ctab, 0);
                         }
                         else if (border_with_function[i].TypeBC == ABoundaryCondition.neumann)
@@ -186,7 +186,7 @@ namespace Diffusion2D_Library
                             border_with_function[i].PositionFixed = Y[0, 0];
                             C0 = border_with_function[i].BoundaryFunction(0.0, border_with_function[i].PositionVaries, border_with_function[i].PositionFixed);
 
-                            RVector Ctab = C_Initial.GetRowVector(1) + C0;
+                            RVector Ctab = C_Initial.GetRowVector(0) + C0;
                             C_Initial.ReplaceRow(Ctab, 0);
                         }
                         break;
@@ -207,6 +207,7 @@ namespace Diffusion2D_Library
             start_idx2 = 1;
 
             A_explicit = new TridiagonalMatrix[nx];
+            A_implicit = new TridiagonalMatrix[nx];
             B_row = new TridiagonalMatrix[nx];
             B_col = new TridiagonalMatrix[nx];
 
@@ -215,25 +216,25 @@ namespace Diffusion2D_Library
 
             double nu0 = dt / (2 * Math.Pow(dx, 2));
 
-            RVector nu = new(nx_less2);
-            RVector off_d_val_l0 = new(nx_less3);
-            RVector off_d_val_u0 = new(nx_less3);
-            RVector main0 = new(nx_less2);
-            RVector off_d_val_l1 = new(nx_less3);
-            RVector off_d_val_u1 = new(nx_less3);
-            RVector main1 = new(nx_less2);
-            RVector off_d_val_l2 = new(nx_less3);
-            RVector off_d_val_u2 = new(nx_less3);
-            RVector main2 = new(nx_less2);
+            //RVector nu = new(nx_less2);
+            RVector off_d_val_l0 = new(NX-1);
+            RVector off_d_val_u0 = new(NX - 1);
+            RVector main0 = new(NX);
+            RVector off_d_val_l1 = new(NX - 1);
+            RVector off_d_val_u1 = new(NX - 1);
+            RVector main1 = new(NX);
+            RVector off_d_val_l2 = new(NX - 1);
+            RVector off_d_val_u2 = new(NX - 1);
+            RVector main2 = new(NX);
 
             double D_minus, D_plus;
-            for (int i = start_idx1; i < NX; i++)
+            for (int i = 0; i < NX; i++)
             {
                 RVector D_row = D.GetRowVector(i);
-                double D0 = D_row[start_idx1];
-                double D1 = D_row[start_idx2];
-                double Dend = D_row[nx_less1];
-                double Dend1 = D_row[nx_less2];
+                double D0 = D_row[0];
+                double D1 = D_row[1];
+                double Dend = D_row[NX-1];
+                double Dend1 = D_row[NX-2];
 
                 // Working this for diffusion heterogeneous media
                 //================================================
@@ -241,67 +242,156 @@ namespace Diffusion2D_Library
                 //================================================
                 #region A_explicit
                 D_plus = 0.5 * (D1 + D0);
-                main0[start_idx1] = 1.0 - 2.0 * D_plus * nu0;
+                //main0[1] = 1.0 - 2.0 * D_plus * nu0;
                 NeumannBCs_L_A[i] = 1.0 - D_plus * nu0;
 
                 D_minus = 0.5 * (Dend1 + Dend);
-                main0[end_idx1] = 1.0 - 2.0 * D_minus * nu0;
+                //main0[NX - 2] = 1.0 - 2.0 * D_minus * nu0;
                 NeumannBCs_R_A[i] = 1.0 - D_minus * nu0;
 
-                for (int j = start_idx2; j < end_idx1; j++)
+                for (int j = 1; j < NX-1; j++)
                 {
                     D_minus = 0.5 * (D_row[j - 1] + D_row[j]);
                     D_plus = 0.5 * (D_row[j + 1] + D_row[j]);
                     main0[j] = 1.0 - ((D_minus * nu0) + (D_plus * nu0));
                 }
-
-                for (int j = start_idx2; j < end_idx1 + 1; j++)
+                for (int j = 1; j < NX; j++)
                 {
                     D_minus = 0.5 * (D_row[j] + D_row[j - 1]);
                     off_d_val_l0[j - 1] = nu0 * D_minus;
                 }
-
-                for (int j = start_idx1; j < end_idx1; j++)
+                for (int j = 0; j < NX-1; j++)
                 {
                     D_plus = 0.5 * (D_row[j + 1] + D_row[j]);
                     off_d_val_u0[j] = nu0 * D_plus;
                 }
 
-                A_explicit[i] = new TridiagonalMatrix(main0, off_d_val_l0, off_d_val_u0);
+                A_explicit[i] = new TridiagonalMatrix(main0, off_d_val_u0, off_d_val_l0);
+                
+                if (border_with_function[2].TypeBC == ABoundaryCondition.dirichlet)
+                {
+                    //D_plus = 0.5 * (D1 + D0);
+                    A_explicit[i][0, 0] = 1.0; // D_plus * nu0;
+                    A_explicit[i][0, 1] = 0.0;
+                }
+                else
+                {
+                    D_plus = 0.5 * (D1 + D0);
+                    A_explicit[i][0, 0] = 1.0; // dx; //1.0 - dx * D_plus * nu0; // C0[0]
+                    A_explicit[i][0, 1] = 0.0; // 1.0; // dx * D_plus * nu0; // C0[0]
+                    A_explicit[i][1, 1] = 1.0 - D_plus * nu0; // C0[0]
+                    //A_explicit[i][1, 0] = dx * D_plus * nu0; // C0[0]
+
+                }
+                if (border_with_function[1].TypeBC == ABoundaryCondition.dirichlet)
+                {
+                    //D_minus = 0.5 * (Dend1 + Dend);
+                    A_explicit[i][NX - 1, NX - 1] = 1.0; // D_minus * nu0;
+                    A_explicit[i][NX - 1, NX - 2] = 0.0;
+                }
+                else
+                {
+                    A_explicit[i][NX - 1, NX - 1] = 1.0; // dx; //1.0 - dx * D_plus * nu0; // C0[0]
+                    A_explicit[i][NX - 1, NX - 2] = 0.0; // 1.0; // dx * D_plus * nu0; // C0[0]
+                    A_explicit[i][NX - 2, NX - 2] = 1.0 - D_minus * nu0; // C0[0]
+                    //A_explicit[i][NX - 2, NX - 1] = dx * D_minus * nu0; // C0[0]
+                }
                 #endregion
-                ////================================================
-                //// The B-row Matrix next
-                ////================================================
-                #region B_row
+                //
+                // A Implicit for the one-half time-step
+                //
+                #region A_implicit
                 D_plus = 0.5 * (D1 + D0);
-                main1[start_idx1] = 1.0 + 2.0 * D_plus * nu0;
+                //main0[1] = 1.0 - 2.0 * D_plus * nu0;
+                NeumannBCs_L_A[i] = 1.0 - D_plus * nu0;
 
                 D_minus = 0.5 * (Dend1 + Dend);
-                main1[end_idx1] = 1.0 + 2.0 * D_minus * nu0;
+                //main0[NX - 2] = 1.0 - 2.0 * D_minus * nu0;
+                NeumannBCs_R_A[i] = 1.0 - D_minus * nu0;
 
-                for (int j = start_idx2; j < end_idx1; j++)
+                for (int j = 1; j < NX - 1; j++)
+                {
+                    D_minus = 0.5 * (D_row[j - 1] + D_row[j]);
+                    D_plus = 0.5 * (D_row[j + 1] + D_row[j]);
+                    main0[j] = 1.0 - ((D_minus * nu0) + (D_plus * nu0));
+                }
+                for (int j = 1; j < NX; j++)
+                {
+                    D_minus = 0.5 * (D_row[j] + D_row[j - 1]);
+                    off_d_val_l0[j - 1] = nu0 * D_minus;
+                }
+                for (int j = 0; j < NX - 1; j++)
+                {
+                    D_plus = 0.5 * (D_row[j + 1] + D_row[j]);
+                    off_d_val_u0[j] = nu0 * D_plus;
+                }
+
+                A_implicit[i] = new TridiagonalMatrix(main0, off_d_val_u0, off_d_val_l0);
+                A_implicit[i][0, 0] = 1.0;
+                A_implicit[i][0, 1] = 0.0;
+                A_implicit[i][NX - 1, NX - 1] = 1.0;
+                A_implicit[i][NX - 1, NX - 2] = 0.0;
+                #endregion
+                //================================================
+                // The B-row Matrix
+                //================================================
+                #region B_row
+                D_plus = 0.5 * (D1 + D0);
+                //main1[start_idx1] = 1.0 + 2.0 * D_plus * nu0;
+
+                D_minus = 0.5 * (Dend1 + Dend);
+                //main1[end_idx1] = 1.0 + 2.0 * D_minus * nu0;
+
+                for (int j = 1; j < NX - 1; j++)
                 {
                     D_minus = 0.5 * (D_row[j - 1] + D_row[j]);
                     D_plus = 0.5 * (D_row[j + 1] + D_row[j]);
                     main1[j] = 1.0 + ((D_minus * nu0) + (D_plus * nu0));
                 }
-
-                for (int j = start_idx2; j < end_idx1 + 1; j++)
+                for (int j = 1; j < NX; j++)
                 {
                     D_minus = 0.5 * (D_row[j - 1] + D_row[j]);
                     off_d_val_l1[j - 1] = -nu0 * D_minus;
                 }
-
-                for (int j = start_idx1; j < end_idx1; j++)
+                for (int j = 0; j < NX-1; j++)
                 {
                     D_plus = 0.5 * (D_row[j + 1] + D_row[j]);
                     off_d_val_u1[j] = -nu0 * D_plus;
                 }
 
-                B_row[i] = new TridiagonalMatrix(main1, off_d_val_l1, off_d_val_u1);
+                B_row[i] = new TridiagonalMatrix(main1, off_d_val_u1, off_d_val_l1);
+
+                if (border_with_function[2].TypeBC == ABoundaryCondition.dirichlet)
+                {
+                    //D_plus = 0.5 * (D1 + D0);
+                    B_row[i][0, 0] = 1.0; // D_plus * nu0;
+                    B_row[i][0, 1] = 0.0;
+                }
+                else
+                {
+                    D_plus = 0.5 * (D1 + D0);
+                    B_row[i][0, 0] = 1.0 + 2.0 * D_plus * nu0; // C0[0]
+                    B_row[i][0, 1] = -2.0 * D_plus * nu0; // C0[0]
+                    //B_row[i][1, 1] = 1.0 - dx * D_plus * nu0; // C0[0]
+
+                }
+
+                if (border_with_function[1].TypeBC == ABoundaryCondition.dirichlet)
+                {
+                    //
+                    B_row[i][NX - 1, NX - 1] = 1.0; // D_minus * nu0;
+                    B_row[i][NX - 1, NX - 2] = 0.0;
+                }
+                else
+                {
+                    D_minus = 0.5 * (Dend1 + Dend);
+                    B_row[i][NX - 1, NX - 1] = 1.0 + 2.0 * D_minus * nu0; // dx; //1.0 - dx * D_plus * nu0; // C0[0]
+                    B_row[i][NX - 1, NX - 2] = -2.0 * D_minus * nu0; //1.0; // dx * D_plus * nu0; // C0[0]
+                    //B_row[i][NX - 2, NX - 2] = 1.0 - dx * D_plus * nu0; // C0[0]
+                }
                 #endregion
                 ////================================================
-                //// The B-column Matrix last
+                //// The B-column Matrix
                 ////================================================
                 #region B_col
                 RVector D_col = D.GetColVector(i);
@@ -311,31 +401,56 @@ namespace Diffusion2D_Library
                 Dend1 = D_col[nx - 2];
 
                 D_plus = 0.5 * (D1 + D0);
-                main2[start_idx1] = 1.0 + 2.0 * D_plus * nu0;
+                //main2[start_idx1] = 1.0 + 2.0 * D_plus * nu0;
 
                 D_minus = 0.5 * (Dend1 + Dend);
-                main2[end_idx1] = 1.0 + 2.0 * D_minus * nu0;
+                //main2[end_idx1] = 1.0 + 2.0 * D_minus * nu0;
 
-                for (int j = start_idx2; j < end_idx1; j++)
+                for (int j = 1; j < NX-1; j++)
                 {
                     D_minus = 0.5 * (D_col[j - 1] + D_col[j]);
                     D_plus = 0.5 * (D_col[j + 1] + D_col[j]);
                     main2[j] = 1.0 + ((D_minus * nu0) + (D_plus * nu0));
                 }
-
-                for (int j = start_idx2; j < end_idx1 + 1; j++)
+                for (int j = 1; j < NX; j++)
                 {
                     D_minus = 0.5 * (D_col[j - 1] + D_col[j]);
                     off_d_val_l2[j - 1] = -nu0 * D_minus;
                 }
-
-                for (int j = start_idx1; j < end_idx1; j++)
+                for (int j = 0; j < NX-1; j++)
                 {
                     D_plus = 0.5 * (D_col[j + 1] + D_col[j]);
                     off_d_val_u2[j] = -nu0 * D_plus;
                 }
 
                 B_col[i] = new TridiagonalMatrix(main2, off_d_val_l2, off_d_val_u2);
+
+                if (border_with_function[3].TypeBC == ABoundaryCondition.dirichlet)
+                {
+                    //D_plus = 0.5 * (D1 + D0);
+                    B_col[i][0, 0] = 1.0; // D_plus * nu0;
+                    B_col[i][0, 1] = 0.0;
+                }
+                else
+                {
+                    D_plus = 0.5 * (D1 + D0);
+                    B_col[i][0, 0] = 1.0 + 2.0 * D_plus * nu0; // C0[0]
+                    B_col[i][0, 1] = -2.0 * D_plus * nu0; // C0[0]
+
+                }
+                if (border_with_function[0].TypeBC == ABoundaryCondition.dirichlet)
+                {
+                    //
+                    B_col[i][NX - 1, NX - 1] = 1.0; // D_minus * nu0;
+                    B_col[i][NX - 1, NX - 2] = 0.0;
+                }
+                else
+                {
+                    D_minus = 0.5 * (Dend1 + Dend);
+                    B_col[i][NX - 1, NX - 1] = 1.0 + 2.0 * D_minus * nu0; // dx; //1.0 - dx * D_plus * nu0; // C0[0]
+                    B_col[i][NX - 1, NX - 2] = -2.0 * D_minus * nu0; //1.0; // dx * D_plus * nu0; // C0[0]
+                    //B_row[i][NX - 2, NX - 2] = 1.0 - dx * D_plus * nu0; // C0[0]
+                }
                 #endregion
             }
 
@@ -396,65 +511,34 @@ namespace Diffusion2D_Library
                         }
                     }
 
+                    // 0 = top, 1 = right, 2 = left, 3 = bottom
+                    CT = BCs_Functions[0].BoundaryFunction(t * dt, BCs_Functions[0].PositionVaries, BCs_Functions[0].PositionFixed);
+                    CR = BCs_Functions[1].BoundaryFunction(t * dt, BCs_Functions[1].PositionVaries, BCs_Functions[1].PositionFixed);
+                    CL = BCs_Functions[2].BoundaryFunction(t * dt, BCs_Functions[2].PositionVaries, BCs_Functions[2].PositionFixed);
+                    CB = BCs_Functions[3].BoundaryFunction(t * dt, BCs_Functions[3].PositionVaries, BCs_Functions[3].PositionFixed);
+
                     // ===================
                     // Explicit time-step
                     // ===================
-                    // 0 = top, 1 = right, 2 = left, 3 = bottom
-                    CR = BCs_Functions[1].BoundaryFunction(t * dt, BCs_Functions[1].PositionVaries, BCs_Functions[1].PositionFixed);
-                    CL = BCs_Functions[2].BoundaryFunction(t * dt, BCs_Functions[2].PositionVaries, BCs_Functions[2].PositionFixed);
-                    double holdA0 = 0.0, holdA1 = 0.0;
-                    for (int i = start_idx2; i < nx_less1; i++)
+                    for (int i = 0; i < NX; i++)
                     {
                         RVector xold;
-                        if (t == 0) { xold = C_Initial.GetRowVector(i, start_idx2, nx_less1); }
-                        else { xold = C_Im2.GetRowVector(i, start_idx2, nx_less1); }
-
-                        if (BCs_Functions[2].TypeBC == ABoundaryCondition.neumann) { holdA0 = A_explicit[i][start_idx1, start_idx1]; A_explicit[i][start_idx1, start_idx1] = NeumannBCs_L_A[i]; }
-                        if (BCs_Functions[1].TypeBC == ABoundaryCondition.neumann) { holdA1 = A_explicit[i][end_idx1, end_idx1]; A_explicit[i][end_idx1, end_idx1] = NeumannBCs_R_A[i]; }
-
+                        if (t == 0) { xold = C_Initial.GetRowVector(i); } //xold = C_Initial.GetRowVector(i, start_idx2, nx_less1); 
+                        else { xold = C_Im2.GetRowVector(i); } //, start_idx2, nx_less1
                         RVector v1 = A_explicit[i].Dot(xold);
-                        C_Ex.ReplaceRow(v1, i, start_idx2, nx_less1);
 
-                        // Left BCs
-                        switch (BCs_Functions[2].TypeBC)
-                        {
-                            case ABoundaryCondition.dirichlet:
-                                C_Ex[i, start_idx1] = CL[i];
-                                C_Ex[i, start_idx2] = C_Ex[i, start_idx2] + (-(NeumannBCs_L_A[i] - 1)) * CL[i];
-                                break;
-                            case ABoundaryCondition.neumann:
-                                //C_Ex[i, start_idx2] = C_Ex[i, start_idx2] + (-(NeumannBCs_L_A[i] - 1)) * dx * CL[i];
-                                //C_Ex[i, start_idx1] = C_Ex[i, start_idx2];
-                                double c1 = 48 * C_Ex[i, 1];
-                                double c2 = 36 * C_Ex[i, 2];
-                                double c3 = 16 * C_Ex[i, 3];
-                                double c4 = 3 * C_Ex[i, 4];
-                                double avalue = 12 * dx * CL[i] - c1 + c2 + c3 - c4;
-                                C_Ex[i, start_idx1] = -1 / 25 * avalue;
-                                break;
-                        }
+                        // Left BC
+                        if (BCs_Functions[2].TypeBC == ABoundaryCondition.dirichlet) { v1[0] = v1[0] + CL[i]; } //A_explicit[i][0, 1] *
                         // Right BCs
-                        switch (BCs_Functions[1].TypeBC)
-                        {
-                            case ABoundaryCondition.dirichlet:
-                                C_Ex[i, nx_less1] = CR[i];
-                                C_Ex[i, nx_less2] = C_Ex[i, nx_less2] + (-(NeumannBCs_R_A[i] - 1)) * CR[i];
-                                break;
-                            case ABoundaryCondition.neumann:
-                                //C_Ex[i, nx_less2] = C_Ex[i, nx_less2] + (-(NeumannBCs_R_A[i] - 1)) * dx * CR[i];
-                                //C_Ex[i, nx_less1] = C_Ex[i, nx_less2];
-                                double c1 = 48 * C_Ex[i, C_Ex.GetnCols - 1 - 1];
-                                double c2 = 36 * C_Ex[i, C_Ex.GetnCols - 1 - 2];
-                                double c3 = 16 * C_Ex[i, C_Ex.GetnCols - 1 - 3];
-                                double c4 = 3 * C_Ex[i, C_Ex.GetnCols - 1 - 4];
-                                double avalue = 12 * dx * CR[i] - c1 + c2 + c3 - c4;
-                                C_Ex[i, C_Ex.GetnCols - 1] = -1 / 25 * avalue;
-                                break;
-                        }
-
-                        if (BCs_Functions[2].TypeBC == ABoundaryCondition.neumann) { A_explicit[i][start_idx1, start_idx1] = holdA0; }
-                        if (BCs_Functions[1].TypeBC == ABoundaryCondition.neumann) { A_explicit[i][end_idx1, end_idx1] = holdA1; }
+                        if (BCs_Functions[1].TypeBC == ABoundaryCondition.dirichlet) { v1[NX - 1] = v1[NX - 1] + CR[i]; } //A_explicit[i][0, 1] * 
+                        C_Ex.ReplaceRow(v1, i); //, start_idx2, nx_less1
                     }
+
+                    // Top BC
+                    if (BCs_Functions[0].TypeBC == ABoundaryCondition.dirichlet) { C_Ex.ReplaceRow(CT, NY - 1); }
+                    // Bottom BCs
+                    if (BCs_Functions[3].TypeBC == ABoundaryCondition.dirichlet) { C_Ex.ReplaceRow(CB, 0); }
+
                     // ===================
                     // ===================
                     // One-half implicit time-step
@@ -465,113 +549,65 @@ namespace Diffusion2D_Library
                     else { fn = gxt_function(X, Y, t12, cf_2D.DValues, C_Im2); }
 
                     f12 = dt / 2.0 * fn;
-
-                    // BCs
                     RVector gn, g0;
-                    gn = BCs_Functions[0].BoundaryFunction((t + 1) * dt, BCs_Functions[0].PositionVaries, BCs_Functions[0].PositionFixed);
-                    g0 = BCs_Functions[0].BoundaryFunction(t * dt, BCs_Functions[0].PositionVaries, BCs_Functions[0].PositionFixed);
-                    CT = (0.5 * B_row[nx_less1].Dot(gn.Section(start_idx2, nx_less1))) + (0.5 * A_explicit[nx_less1].Dot(g0.Section(start_idx2, nx_less1)));
-
-                    gn = BCs_Functions[3].BoundaryFunction((t + 1) * dt, BCs_Functions[3].PositionVaries, BCs_Functions[3].PositionFixed);
-                    g0 = BCs_Functions[3].BoundaryFunction(t * dt, BCs_Functions[3].PositionVaries, BCs_Functions[3].PositionFixed);
-                    CB = (0.5 * B_row[start_idx1].Dot(gn.Section(start_idx2, nx_less1))) + (0.5 * A_explicit[start_idx1].Dot(g0.Section(start_idx2, nx_less1)));
-
-                    TridiagonalMatrix B_col2;
-                    for (int j = start_idx2; j < nx_less1; j++)
+                    for (int j = 0; j < NX; j++)
                     {
+                        // BCs                        
+                        gn = BCs_Functions[0].BoundaryFunction((t + 1) * dt, BCs_Functions[0].PositionVaries, BCs_Functions[0].PositionFixed);
+                        g0 = BCs_Functions[0].BoundaryFunction(t * dt, BCs_Functions[0].PositionVaries, BCs_Functions[0].PositionFixed);
+                        CT = (0.5 * B_row[j].Dot(gn)) + (0.5 * A_implicit[j].Dot(g0));
+
+                        gn = BCs_Functions[3].BoundaryFunction((t + 1) * dt, BCs_Functions[3].PositionVaries, BCs_Functions[3].PositionFixed);
+                        g0 = BCs_Functions[3].BoundaryFunction(t * dt, BCs_Functions[3].PositionVaries, BCs_Functions[3].PositionFixed);
+                        CB = (0.5 * B_row[j].Dot(gn)) + (0.5 * A_implicit[j].Dot(g0));
+
                         RVector v1 = C_Ex.GetColVector(j);
                         RVector f12s = f12.GetColVector(j);
                         RVector v2, u12;
-                        double s = -B_col[j][1, 2];
+                        double s = -B_col[j][2, 1];
+                        v2 = v1 + f12s;
 
-                        // Bottom dirichlet, Top dirichlet
-                        if (BCs_Functions[3].TypeBC == ABoundaryCondition.dirichlet && BCs_Functions[0].TypeBC == ABoundaryCondition.dirichlet)
-                        {
-                            v2 = (v1 + f12s).Section(start_idx2, nx_less1);
-                            v2[0] = s * (v1[0] + f12s[0]) + v1[1] + f12s[1];
-                            v2[v2.GetRVectorSize - 1] = s * (v1[nx_less1] + f12s[nx_less1]) + v1[nx_less2] + f12s[nx_less2];
-                            B_col2 = B_col[j];
+                        // Bottom BC
+                        if (BCs_Functions[3].TypeBC == ABoundaryCondition.dirichlet) { v2[1] = v2[1] + s * CB[j]; }
+                        else if (BCs_Functions[3].TypeBC == ABoundaryCondition.neumann) { v2[0] = v2[0] + 2.0 * s * dy * CB[j]; }
+                        // Top BCs
+                        if (BCs_Functions[0].TypeBC == ABoundaryCondition.dirichlet) { v2[NX - 2] = v2[NX - 2] + s * CT[j]; }
+                        else if (BCs_Functions[0].TypeBC == ABoundaryCondition.neumann) { v2[NX - 1] = v2[NX - 1] + 2.0 * s * dy * CT[j]; }
 
-                            u12 = TridiagonalMatrix.Thomas_Algorithm(B_col2, v2);
-                            int ns = (nrows - 1) - u12.GetRVectorSize;
-                            C_Im1.ReplaceCol(u12, j, ns, u12.GetRVectorSize + 1);
+                        u12 = TridiagonalMatrix.Thomas_Algorithm(B_col[j], v2);
+                        C_Im1.ReplaceCol(u12, j); //, ns, u12.GetRVectorSize
+                    }
 
-                            if (j < CB.GetRVectorSize) { C_Im1[0, j] = CB[j]; C_Im1[nrows - 1, j] = CT[j]; }
-                            else { C_Im1[0, j] = CB[1]; C_Im1[nrows - 1, j] = CT[CT.GetRVectorSize - 1]; }
-                        }
-                        // Bottom neumann, Top dirichlet
-                        else if (BCs_Functions[3].TypeBC == ABoundaryCondition.neumann && BCs_Functions[0].TypeBC == ABoundaryCondition.dirichlet)
-                        {
-                            if (j < CB.GetRVectorSize)
-                            {
-                                v1[0] = (2 * dy * CB[j] / -3) - (4 / 3 * v1[1]) + (1 / 3 * v1[2]); //nu * 
-                                v1[ncols - 1] = CT[j]; //nu * 
-                            }
-                            else
-                            {
-                                v1[0] = (2 * dy * CB[1] / -3) - (4 / 3 * v1[1]) + (1 / 3 * v1[2]); //nu * 
-                                v1[ncols - 1] = CT[CT.GetRVectorSize - 1]; //nu * 
-                            }
-                            v2 = (v1 + f12s).Section(start_idx1, nx_less1);
-                            v2[0] = 2 * s * dx * (v1[0] + f12s[0]) + v2[0]; //v1[0] + f12s[0]
-                            v2[v2.GetRVectorSize - 1] = s * (v1[nx_less1] + f12s[nx_less1]) + v1[nx_less2] + f12s[nx_less2];
+                    // Left BC
+                    switch (BCs_Functions[2].TypeBC)
+                    {
+                        case ABoundaryCondition.dirichlet:
+                            C_Im1.ReplaceCol(CL, 0);
+                            break;
+                        case ABoundaryCondition.neumann:
+                            //RVector c1 = C_Im1.GetColVector(1);
+                            //RVector avalue = (dx * CL) + c1;
+                            //C_Im1.ReplaceCol(avalue, 0);
+                            break;
+                    }
+                    // Right BCs
+                    switch (BCs_Functions[1].TypeBC)
+                    {
+                        case ABoundaryCondition.dirichlet:
+                            C_Im1.ReplaceCol(CR, NX - 1);
+                            break;
+                        case ABoundaryCondition.neumann:
+                            //RVector c1 = 48 * C_Im1.GetColVector(NX - 2);
+                            //RVector c2 = 36 * C_Im1.GetColVector(NX - 3);
+                            //RVector c3 = 16 * C_Im1.GetColVector(NX - 4);
+                            //RVector c4 = 3 * C_Im1.GetColVector(NX - 5);
+                            //RVector avalue = 12 * dx * CR - c1 + c2 - c3 + c4;
+                            //C_Im1.ReplaceCol(-1.0 / 25.0 * avalue, NX - 1);
 
-                            B_col2 = new(v2.GetRVectorSize, v2.GetRVectorSize);
-                            B_col2.FitMainUpperLower(start_idx2, nx_less1, start_idx2, nx_less1 - 1, start_idx2, nx_less1 - 1, B_col[j].GetMain(), B_col[j].GetUpper(), B_col[j].GetLower());
-                            B_col2[0, 1] = -2 * s;
-                            B_col2[0, 0] = B_col2[1, 1];
-                            B_col2[1, 0] = B_col2[1, 2];
-
-                            u12 = TridiagonalMatrix.Thomas_Algorithm(B_col2, v2);
-
-                            int ns = start_idx1;
-                            C_Im1.ReplaceCol(u12, j, ns, u12.GetRVectorSize);
-                            if (j < CB.GetRVectorSize) { C_Im1[nrows - 1, j] = CT[j]; }
-                            else { C_Im1[nrows - 1, j] = CT[CT.GetRVectorSize - 1]; }
-                        }
-                        // Bottom dirichlet, Top neumann
-                        else if (BCs_Functions[3].TypeBC == ABoundaryCondition.dirichlet && BCs_Functions[0].TypeBC == ABoundaryCondition.neumann)
-                        {
-                            v2 = (v1 + f12s).Section(start_idx2, NX);
-                            v2[0] = s * (v1[0] + f12s[0]) + v1[1] + f12s[1];
-                            v2[v2.GetRVectorSize - 1] = 2 * s * dx * (v1[nx_less1] + f12s[nx_less1]) + v1[nx_less2] + f12s[nx_less2];
-
-                            B_col2 = new(v2.GetRVectorSize, v2.GetRVectorSize);
-                            B_col2.FitMainUpperLower(start_idx1, nx_less2, start_idx1, nx_less2 - 1, start_idx1, nx_less2 - 1, B_col[j].GetMain(), B_col[j].GetUpper(), B_col[j].GetLower());
-                            B_col2[nx_less2, nx_less3] = -2 * s;
-                            B_col2[nx_less2, nx_less2] = B_col2[nx_less3, nx_less3];
-                            B_col2[nx_less3, nx_less2] = B_col2[nx_less3, nx_less3 - 1];
-
-                            u12 = TridiagonalMatrix.Thomas_Algorithm(B_col2, v2);
-
-                            int ns = start_idx2;
-                            C_Im1.ReplaceCol(u12, j, ns, u12.GetRVectorSize);
-                            if (j < CB.GetRVectorSize) { C_Im1[0, j] = CB[j]; }
-                            else { C_Im1[0, j] = CB[1]; }
-                        }
-                        // Bottom neumann, top neumann
-                        else
-                        {
-                            v2 = v1 + f12s;
-                            v2[0] = 2 * s * dx * (v1[0] + f12s[0]) + v1[1] + f12s[1];
-                            v2[v2.GetRVectorSize - 1] = 2 * s * dx * (v1[nx_less1] + f12s[nx_less1]) + v1[nx_less2] + f12s[nx_less2];
-
-                            B_col2 = new(v2.GetRVectorSize, v2.GetRVectorSize);
-                            B_col2.FitMainUpperLower(start_idx2, nx_less1, start_idx2, nx_less1 - 1, start_idx2, nx_less1 - 1, B_col[j].GetMain(), B_col[j].GetUpper(), B_col[j].GetLower());
-
-                            B_col2[0, 1] = -2 * s;
-                            B_col2[0, 0] = B_col2[1, 1];
-                            B_col2[1, 0] = B_col2[1, 2];
-
-                            B_col2[nx_less1, nx_less2] = -2 * s;
-                            B_col2[nx_less1, nx_less1] = B_col2[nx_less3, nx_less3];
-                            B_col2[nx_less2, nx_less1] = B_col2[nx_less3, nx_less3 - 1];
-
-                            u12 = TridiagonalMatrix.Thomas_Algorithm(B_col2, v2);
-
-                            int ns = start_idx1;
-                            C_Im1.ReplaceCol(u12, j, ns, u12.GetRVectorSize);
-                        }
+                            //RVector c1 = C_Im1.GetColVector(NX - 2);
+                            //RVector avalue = (dx * CR) + c1;
+                            //C_Im1.ReplaceCol(avalue, NX - 1);
+                            break;
                     }
                     // ===================
                     // ===================
@@ -580,158 +616,24 @@ namespace Diffusion2D_Library
                     CR = BCs_Functions[1].BoundaryFunction((t + 1) * dt, BCs_Functions[1].PositionVaries, BCs_Functions[1].PositionFixed);
                     CL = BCs_Functions[2].BoundaryFunction((t + 1) * dt, BCs_Functions[2].PositionVaries, BCs_Functions[2].PositionFixed);
                     
-                    TridiagonalMatrix B_row2;
-                    for (int k = 1; k < nrows - 1; k++)
+                    //TridiagonalMatrix B_row2;
+                    for (int k = 0; k < NY; k++)
                     {
+                        RVector u1;
                         RVector v1 = C_Ex.GetRowVector(k);
                         RVector u12 = C_Im1.GetRowVector(k);
+                        double s = -B_row[k][2, 1];
                         RVector b = (2 * u12) - v1;
-                        //if (k < CL.GetRVectorSize) { b[0] = CL[k]; b[nrows - 1] = CR[k]; }
-                        //else { b[0] = CL[1]; b[nrows - 1] = CR[CR.GetRVectorSize - 1]; }
 
-                        RVector b2, u1;
-                        double s = -B_row[k][1, 2];
-                        // Left dirichlet, Right dirichlet
-                        if (BCs_Functions[2].TypeBC == ABoundaryCondition.dirichlet && BCs_Functions[1].TypeBC == ABoundaryCondition.dirichlet)
-                        {
-                            b2 = b.Section(start_idx2, nx_less1);
-                            //b2[0] = s * b[0];
-                            //b2[b2.GetRVectorSize - 1] = s * b[nx_less1];
-                            if (k < CL.GetRVectorSize)
-                            {
-                                b2[0] = s * b[0] + b[0];
-                                b2[b2.GetRVectorSize - 1] = s * CR[k] + b[b.GetRVectorSize - 1];
-                            }
-                            else
-                            {
-                                b2[0] = s * b[1] + b[0];
-                                b2[b2.GetRVectorSize - 1] = s * CR[CR.GetRVectorSize - 1] + b[b.GetRVectorSize - 1];
-                            }
+                        // Left BC
+                        if (BCs_Functions[2].TypeBC == ABoundaryCondition.dirichlet) { b[1] = b[1] + s * CL[k]; }
+                        else if (BCs_Functions[2].TypeBC == ABoundaryCondition.neumann) { b[0] = b[0] + 2.0 * s * dx * CL[k]; }
+                        // Right BC
+                        if (BCs_Functions[1].TypeBC == ABoundaryCondition.dirichlet) { b[NX - 2] = b[NX - 2] + s * CR[k]; }
+                        else if (BCs_Functions[1].TypeBC == ABoundaryCondition.neumann) { b[NX - 1] = b[NX - 1] + 2.0 * s * dx * CR[k]; }
 
-                            B_row2 = B_row[k];
-
-                            u1 = TridiagonalMatrix.Thomas_Algorithm(B_row2, b2);
-                            int ns = (nrows - 1) - u1.GetRVectorSize;
-                            C_Im2.ReplaceRow(u1, k, ns, u12.GetRVectorSize + 1);
-                            if (k < CL.GetRVectorSize) { C_Im2[0, k] = CL[k]; C_Im2[nrows - 1, k] = CR[k]; }
-                            else { C_Im2[0, k] = CL[1]; C_Im2[nrows - 1, k] = CR[CR.GetRVectorSize - 1]; }
-                        }
-                        // Left neumann, Right dirichlet
-                        else if (BCs_Functions[2].TypeBC == ABoundaryCondition.neumann && BCs_Functions[1].TypeBC == ABoundaryCondition.dirichlet)
-                        {
-                            b2 = b.Section(start_idx1, nx_less1);
-                            //b2[0] = 2 * s * dx * b[0];
-                            //b2[b2.GetRVectorSize - 1] = s * b[nx_less1];
-                            if (k < CL.GetRVectorSize)
-                            {
-                                b2[0] = 2 * s * dx * CL[k] + b[0];
-                                b2[b2.GetRVectorSize - 1] = s * CR[k] + b[b.GetRVectorSize - 1];
-                            }
-                            else
-                            {
-                                b2[0] = 2 * s * dx * CL[1] + b[0];
-                                b2[b2.GetRVectorSize - 1] = s * CR[CR.GetRVectorSize - 1] + b[b.GetRVectorSize - 1];
-                            }
-
-                            B_row2 = new(b2.GetRVectorSize, b2.GetRVectorSize);
-                            B_row2.FitMainUpperLower(start_idx2, nx_less1, start_idx2, nx_less1 - 1, start_idx2, nx_less1 - 1, B_row[k].GetMain(), B_row[k].GetUpper(), B_row[k].GetLower());
-                            B_row2[0, 1] = -2 * s;
-                            B_row2[0, 0] = B_row2[1, 1];
-                            B_row2[1, 0] = B_row2[1, 2];
-
-                            u1 = TridiagonalMatrix.Thomas_Algorithm(B_row2, b2);
-
-                            int ns = start_idx1;
-                            C_Im2.ReplaceRow(u1, k, ns, u1.GetRVectorSize);
-                            if (k < CL.GetRVectorSize) { C_Im2[nrows - 1, k] = CR[k]; }
-                            else { C_Im2[nrows - 1, k] = CR[CR.GetRVectorSize - 1]; }
-                        }
-                        // Left dirichlet, Right neumann
-                        else if (BCs_Functions[3].TypeBC == ABoundaryCondition.dirichlet && BCs_Functions[0].TypeBC == ABoundaryCondition.neumann)
-                        {
-                            b2 = b.Section(start_idx2, NX);
-                            //b2[0] = s * b[0];
-                            //b2[b2.GetRVectorSize - 1] = 2 * s * dx * b[nx_less1];
-                            if (k < CL.GetRVectorSize)
-                            {
-                                b2[0] = s * b[0] + b[0];
-                                b2[b2.GetRVectorSize - 1] = 2 * s * dx * CR[k] + b[b.GetRVectorSize - 1];
-                            }
-                            else
-                            {
-                                b2[0] = s * b[1] + b[0];
-                                b2[b2.GetRVectorSize - 1] = 2 * s * dx * CR[CR.GetRVectorSize - 1] + b[b.GetRVectorSize - 1];
-                            }
-
-                            B_row2 = new(b2.GetRVectorSize, b2.GetRVectorSize);
-                            B_row2.FitMainUpperLower(start_idx1, nx_less2, start_idx1, nx_less2 - 1, start_idx1, nx_less2 - 1, B_row[k].GetMain(), B_row[k].GetUpper(), B_row[k].GetLower());
-                            B_row2[nx_less2, nx_less3] = -2 * s;
-                            B_row2[nx_less2, nx_less2] = B_row2[nx_less3, nx_less3];
-                            B_row2[nx_less3, nx_less2] = B_row2[nx_less3, nx_less3 - 1];
-
-                            u1 = TridiagonalMatrix.Thomas_Algorithm(B_row2, b2);
-
-                            int ns = start_idx2;
-                            C_Im2.ReplaceRow(u1, k, ns, u1.GetRVectorSize);
-                            if (k < CL.GetRVectorSize) { C_Im2[0, k] = CL[k]; }
-                            else { C_Im2[0, k] = CL[1]; }
-                        }
-                        // Left neumann, Right neumann
-                        else
-                        {
-                            b2 = new RVector(b.GetRVectorSize);
-                            for (int kk = 0; kk < b.GetRVectorSize-1; kk++) { b2[kk] = b[kk]; }
-                            
-                            if (k < CL.GetRVectorSize)
-                            {
-                                b[0] = (2 * dx * CL[k] / -3) - (4 / 3 * b[1]) + (1 / 3 * b[2]);
-                                b[b.GetRVectorSize - 1] = (2 * dx * CR[k] / -3) - (4 / 3 * b[b.GetRVectorSize - 2]) + (1 / 3 * b[b.GetRVectorSize - 3]);
-                                b2[0] = s * b[0]; // 2 * s * dx * CL[k] + b[0]; // 
-                                b2[b2.GetRVectorSize - 1] = s * b[b.GetRVectorSize - 1];  //2 * s * dx * CR[k] + b[b.GetRVectorSize - 1]; // 
-                            }
-                            else
-                            {
-                                b[0] = (2 * dx * CL[1] / -3) - (4 / 3 * b[1]) + (1 / 3 * b[2]);
-                                b[b.GetRVectorSize - 1] = (2 * dx * CR[CR.GetRVectorSize - 1] / -3) - (4 / 3 * b[b.GetRVectorSize - 2]) + (1 / 3 * b[b.GetRVectorSize - 3]);
-                                b2[0] = s * b[0]; // 2 * s * dx * CL[k] + b[0]; // 
-                                b2[b2.GetRVectorSize - 1] = s * b[b.GetRVectorSize - 1];  //2 * s * dx * CR[k] + b[b.GetRVectorSize - 1]; //
-
-                                //b2[0] = 2 * s * dx * CL[1] + b[1]; // 
-                                //b2[b2.GetRVectorSize - 1] = 2 * s * dx * CR[CR.GetRVectorSize - 1] + b[b.GetRVectorSize - 1]; // 
-                            }
-
-
-                            B_row2 = new(b2.GetRVectorSize, b2.GetRVectorSize);
-                            B_row2.FitMainUpperLower(start_idx2, nx_less1, start_idx2, nx_less1 - 1, start_idx2, nx_less1 - 1, B_row[k].GetMain(), B_row[k].GetUpper(), B_row[k].GetLower());
-
-                            B_row2[0, 1] = -2 * s;
-                            B_row2[0, 0] = B_row2[1, 1];
-                            B_row2[1, 0] = B_row2[1, 2];
-
-                            B_row2[nx_less1, nx_less2] = -2 * s;
-                            B_row2[nx_less1, nx_less1] = B_row2[nx_less2, nx_less2];
-                            B_row2[nx_less2, nx_less1] = B_row2[nx_less2, nx_less2 - 1];
-
-                            u1 = TridiagonalMatrix.Thomas_Algorithm(B_row2, b2);
-
-                            int ns = start_idx1;
-                            C_Im2.ReplaceRow(u1, k, ns, u1.GetRVectorSize);
-
-                            // Apply the BCs to the left and right sides
-                            double c1 = 48 * C_Im2[k, 1];
-                            double c2 = 36 * C_Im2[k, 2];
-                            double c3 = 16 * C_Im2[k, 3];
-                            double c4 = 3 * C_Im2[k, 4];
-                            double avalue = 12 * dx * CL[k] - c1 + c2 - c3 + c4;
-                            C_Im2[k, start_idx1] = (-1.0 / 25.0) * avalue;
-
-                            c1 = 48 * C_Im2[k, C_Im2.GetnCols - 1 - 1];
-                            c2 = 36 * C_Im2[k, C_Im2.GetnCols - 1 - 2];
-                            c3 = 16 * C_Im2[k, C_Im2.GetnCols - 1 - 3];
-                            c4 = 3 * C_Im2[k, C_Im2.GetnCols - 1 - 4];
-                            avalue = 12 * dx * CR[k] - c1 + c2 - c3 + c4;
-                            C_Im2[k, C_Im2.GetnCols - 1] = (-1.0 / 25.0) * avalue;
-                        }
+                        u1 = TridiagonalMatrix.Thomas_Algorithm(B_row[k], b);
+                        C_Im2.ReplaceRow(u1, k); //, ns, u12.GetRVectorSize + 1
                     }
                     // ===================
                     // Set top and bottom boundary conditions on the C_Im2 matrix
@@ -743,9 +645,21 @@ namespace Diffusion2D_Library
                             C_Im2.ReplaceRow(CT, nrows - 1);
                             break;
                         case ABoundaryCondition.neumann:
-                            CT = BCs_Functions[0].BoundaryFunction(t * dt, BCs_Functions[0].PositionVaries, BCs_Functions[0].PositionFixed);
-                            CB = C_Im2.GetRowVector(nrows - 2);
-                            C_Im2.ReplaceRow(CT * 2 * dy + CB, nrows - 1);
+                            //CT = BCs_Functions[0].BoundaryFunction(t * dt, BCs_Functions[0].PositionVaries, BCs_Functions[0].PositionFixed);
+
+                            //RVector c1 = 48 * C_Im2.GetRowVector(NY - 2);
+                            //RVector c2 = 36 * C_Im2.GetRowVector(NY - 3);
+                            //RVector c3 = 16 * C_Im2.GetRowVector(NY - 4);
+                            //RVector c4 = 3 * C_Im2.GetRowVector(NY - 5);
+                            //RVector avalue = (12 * dy * CT) - c1 + c2 - c3 + c4;
+                            //C_Im2.ReplaceRow((-1.0 / 25.0) * avalue, 0);
+
+                            //RVector c1 = C_Im2.GetRowVector(NY - 2);
+                            //RVector avalue = (2 * dy * CT) + c1;
+                            //C_Im2.ReplaceRow(avalue, 0);
+
+                            //CB = C_Im2.GetRowVector(nrows - 2);
+                            //C_Im2.ReplaceRow(CT * 2 * dy + CB, nrows - 1);
                             break;
                     }
                     switch (BCs_Functions[3].TypeBC)
@@ -756,22 +670,24 @@ namespace Diffusion2D_Library
                             break;
                         case ABoundaryCondition.neumann:
                             //CT = C_Im2.GetRowVector(1);
-                            CB = BCs_Functions[3].BoundaryFunction(t * dt, BCs_Functions[3].PositionVaries, BCs_Functions[3].PositionFixed);
+                            //CB = BCs_Functions[3].BoundaryFunction(t * dt, BCs_Functions[3].PositionVaries, BCs_Functions[3].PositionFixed);
 
                             //RVector c1 = 48 * C_Im2.GetRowVector(1);
                             //RVector c2 = 36 * C_Im2.GetRowVector(2);
                             //RVector c3 = 16 * C_Im2.GetRowVector(3);
                             //RVector c4 = 3 * C_Im2.GetRowVector(4);
-                            //RVector avalue = (12 * dy * CB) - c1 + c2 - c3 + c4;
-                            //C_Im2.ReplaceRow((-1.0 / 25.0) * avalue, 0);
+
+                            //RVector c1 = C_Im2.GetRowVector(1);
+                            //RVector avalue = (2 * dy * CB) + c1; // (12 * dy * CB) - c1 + c2 - c3 + c4;
+                            //C_Im2.ReplaceRow(avalue, 0);
 
                             //RVector c1 = 2 * C_Im2.GetRowVector(1);
                             //RVector c2 = 0.5 * C_Im2.GetRowVector(2);
                             //RVector avalue = (dy * CB) - c1 + c2;
                             //C_Im2.ReplaceRow((-2.0 / 3.0) * avalue, 0);
 
-                            RVector c1 = C_Im2.GetRowVector(1) * 1.0e-4;
-                            C_Im2.ReplaceRow(c1, 0);
+                            //RVector c1 = C_Im2.GetRowVector(1) * 1.0e-4;
+                            //C_Im2.ReplaceRow(c1, 0);
 
                             break;
                     }
@@ -790,4 +706,12 @@ namespace Diffusion2D_Library
             else { C_Final = C_Initial; }
         }
     }
+
+    // Hold this code.  This version of obtaining the derivative doesn't seem to work because there is a huge magnitude change over these points...
+    //RVector c1 = 48 * C_Ex.GetRowVector(NY - 2);
+    //RVector c2 = 36 * C_Ex.GetRowVector(NY - 3);
+    //RVector c3 = 16 * C_Ex.GetRowVector(NY - 4);
+    //RVector c4 = 3 * C_Ex.GetRowVector(NY - 5);
+    //RVector avalue = 12 * dx * CT - c1 + c2 - c3 + c4;
+    //C_Ex.ReplaceRow(-1.0 / 25.0 * avalue, NY - 1);
 }
