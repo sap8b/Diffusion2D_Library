@@ -15,7 +15,7 @@ namespace Diffusion2D_Library
     /// <param name="time">time, in seconds</param>
     /// <returns>A vector storing the composition on a boundary of a 2D field</returns>
     //public delegate RVector BoundaryCondition_Del(double time, int n);
-    public delegate RVector Del_BC_xy(double t, RVector SlidingSide, double FixedValue);
+    public delegate RVector Del_BC_xy(int t, double dt, RVector SlidingSide, double FixedValue);
     /// <summary>
     /// Delegate for assigning the initial composition field in a 2D region
     /// </summary>

@@ -115,7 +115,7 @@ namespace Diffusion2D_Library
                         {
                             border_with_function[i].PositionVaries = X.GetRowVector(X.GetnRows - 1);
                             border_with_function[i].PositionFixed = Y[X.GetnRows - 1, 0];
-                            C0 = border_with_function[i].BoundaryFunction(0.0, border_with_function[i].PositionVaries, border_with_function[i].PositionFixed);
+                            C0 = border_with_function[i].BoundaryFunction(0, dt, border_with_function[i].PositionVaries, border_with_function[i].PositionFixed);
 
                             RVector Ctab = C_Initial.GetRowVector(ny - 1) + C0;
                             C_Initial.ReplaceRow(Ctab, ny - 1);
@@ -124,7 +124,7 @@ namespace Diffusion2D_Library
                         {
                             border_with_function[i].PositionVaries = X.GetRowVector(X.GetnRows - 1);
                             border_with_function[i].PositionFixed = Y[X.GetnRows - 1, 0];
-                            C0 = border_with_function[i].BoundaryFunction(0.0, border_with_function[i].PositionVaries, border_with_function[i].PositionFixed);
+                            C0 = border_with_function[i].BoundaryFunction(0, dt, border_with_function[i].PositionVaries, border_with_function[i].PositionFixed);
 
                             RVector Ctab = C_Initial.GetRowVector(ny - 1) + C0;
                             C_Initial.ReplaceRow(Ctab, ny - 1);
@@ -135,7 +135,7 @@ namespace Diffusion2D_Library
                         {
                             border_with_function[i].PositionVaries = Y.GetColVector(0);
                             border_with_function[i].PositionFixed = X[0, Y.GetnCols - 1];
-                            C0 = border_with_function[i].BoundaryFunction(0.0, border_with_function[i].PositionVaries, border_with_function[i].PositionFixed);
+                            C0 = border_with_function[i].BoundaryFunction(0, dt, border_with_function[i].PositionVaries, border_with_function[i].PositionFixed);
 
                             RVector Ctab = C_Initial.GetColVector(nx - 1) + C0;
                             C_Initial.ReplaceCol(Ctab, nx - 1);
@@ -144,7 +144,7 @@ namespace Diffusion2D_Library
                         {
                             border_with_function[i].PositionVaries = Y.GetColVector(0);
                             border_with_function[i].PositionFixed = X[0, Y.GetnCols - 1];
-                            C0 = border_with_function[i].BoundaryFunction(0.0, border_with_function[i].PositionVaries, border_with_function[i].PositionFixed);
+                            C0 = border_with_function[i].BoundaryFunction(0, dt, border_with_function[i].PositionVaries, border_with_function[i].PositionFixed);
 
                             RVector Ctab = C_Initial.GetColVector(nx - 1) + C0;
                             C_Initial.ReplaceCol(Ctab, nx - 1);
@@ -155,7 +155,7 @@ namespace Diffusion2D_Library
                         {
                             border_with_function[i].PositionVaries = Y.GetColVector(0);
                             border_with_function[i].PositionFixed = X[0, 0];
-                            C0 = border_with_function[i].BoundaryFunction(0.0, border_with_function[i].PositionVaries, border_with_function[i].PositionFixed);
+                            C0 = border_with_function[i].BoundaryFunction(0, dt, border_with_function[i].PositionVaries, border_with_function[i].PositionFixed);
 
                             RVector Ctab = C_Initial.GetColVector(0) + C0;
                             C_Initial.ReplaceCol(Ctab, 0);
@@ -164,7 +164,7 @@ namespace Diffusion2D_Library
                         {
                             border_with_function[i].PositionVaries = Y.GetColVector(0);
                             border_with_function[i].PositionFixed = X[0, 0];
-                            C0 = border_with_function[i].BoundaryFunction(0.0, border_with_function[i].PositionVaries, border_with_function[i].PositionFixed);
+                            C0 = border_with_function[i].BoundaryFunction(0, dt, border_with_function[i].PositionVaries, border_with_function[i].PositionFixed);
 
                             RVector Ctab = C_Initial.GetColVector(0) + C0;
                             C_Initial.ReplaceCol(Ctab, 0);
@@ -175,7 +175,7 @@ namespace Diffusion2D_Library
                         {
                             border_with_function[i].PositionVaries = X.GetRowVector(X.GetnRows - 1);
                             border_with_function[i].PositionFixed = Y[0, 0];
-                            C0 = border_with_function[i].BoundaryFunction(0.0, border_with_function[i].PositionVaries, border_with_function[i].PositionFixed);
+                            C0 = border_with_function[i].BoundaryFunction(0, dt, border_with_function[i].PositionVaries, border_with_function[i].PositionFixed);
 
                             RVector Ctab = C_Initial.GetRowVector(0) + C0;
                             C_Initial.ReplaceRow(Ctab, 0);
@@ -184,7 +184,7 @@ namespace Diffusion2D_Library
                         {
                             border_with_function[i].PositionVaries = X.GetRowVector(X.GetnRows - 1);
                             border_with_function[i].PositionFixed = Y[0, 0];
-                            C0 = border_with_function[i].BoundaryFunction(0.0, border_with_function[i].PositionVaries, border_with_function[i].PositionFixed);
+                            C0 = border_with_function[i].BoundaryFunction(0, dt, border_with_function[i].PositionVaries, border_with_function[i].PositionFixed);
 
                             RVector Ctab = C_Initial.GetRowVector(0) + C0;
                             C_Initial.ReplaceRow(Ctab, 0);
@@ -512,10 +512,10 @@ namespace Diffusion2D_Library
                     }
 
                     // 0 = top, 1 = right, 2 = left, 3 = bottom
-                    CT = BCs_Functions[0].BoundaryFunction(t * dt, BCs_Functions[0].PositionVaries, BCs_Functions[0].PositionFixed);
-                    CR = BCs_Functions[1].BoundaryFunction(t * dt, BCs_Functions[1].PositionVaries, BCs_Functions[1].PositionFixed);
-                    CL = BCs_Functions[2].BoundaryFunction(t * dt, BCs_Functions[2].PositionVaries, BCs_Functions[2].PositionFixed);
-                    CB = BCs_Functions[3].BoundaryFunction(t * dt, BCs_Functions[3].PositionVaries, BCs_Functions[3].PositionFixed);
+                    CT = BCs_Functions[0].BoundaryFunction(t, dt, BCs_Functions[0].PositionVaries, BCs_Functions[0].PositionFixed);
+                    CR = BCs_Functions[1].BoundaryFunction(t, dt, BCs_Functions[1].PositionVaries, BCs_Functions[1].PositionFixed);
+                    CL = BCs_Functions[2].BoundaryFunction(t, dt, BCs_Functions[2].PositionVaries, BCs_Functions[2].PositionFixed);
+                    CB = BCs_Functions[3].BoundaryFunction(t, dt, BCs_Functions[3].PositionVaries, BCs_Functions[3].PositionFixed);
 
                     // ===================
                     // Explicit time-step
@@ -553,12 +553,12 @@ namespace Diffusion2D_Library
                     for (int j = 0; j < NX; j++)
                     {
                         // BCs                        
-                        gn = BCs_Functions[0].BoundaryFunction((t + 1) * dt, BCs_Functions[0].PositionVaries, BCs_Functions[0].PositionFixed);
-                        g0 = BCs_Functions[0].BoundaryFunction(t * dt, BCs_Functions[0].PositionVaries, BCs_Functions[0].PositionFixed);
+                        gn = BCs_Functions[0].BoundaryFunction((t + 1), dt, BCs_Functions[0].PositionVaries, BCs_Functions[0].PositionFixed);
+                        g0 = BCs_Functions[0].BoundaryFunction(t, dt, BCs_Functions[0].PositionVaries, BCs_Functions[0].PositionFixed);
                         CT = (0.5 * B_row[j].Dot(gn)) + (0.5 * A_implicit[j].Dot(g0));
 
-                        gn = BCs_Functions[3].BoundaryFunction((t + 1) * dt, BCs_Functions[3].PositionVaries, BCs_Functions[3].PositionFixed);
-                        g0 = BCs_Functions[3].BoundaryFunction(t * dt, BCs_Functions[3].PositionVaries, BCs_Functions[3].PositionFixed);
+                        gn = BCs_Functions[3].BoundaryFunction((t + 1), dt, BCs_Functions[3].PositionVaries, BCs_Functions[3].PositionFixed);
+                        g0 = BCs_Functions[3].BoundaryFunction(t, dt, BCs_Functions[3].PositionVaries, BCs_Functions[3].PositionFixed);
                         CB = (0.5 * B_row[j].Dot(gn)) + (0.5 * A_implicit[j].Dot(g0));
 
                         RVector v1 = C_Ex.GetColVector(j);
@@ -613,8 +613,8 @@ namespace Diffusion2D_Library
                     // ===================
                     // Full implicit time-step
                     // ===================
-                    CR = BCs_Functions[1].BoundaryFunction((t + 1) * dt, BCs_Functions[1].PositionVaries, BCs_Functions[1].PositionFixed);
-                    CL = BCs_Functions[2].BoundaryFunction((t + 1) * dt, BCs_Functions[2].PositionVaries, BCs_Functions[2].PositionFixed);
+                    CR = BCs_Functions[1].BoundaryFunction((t + 1), dt, BCs_Functions[1].PositionVaries, BCs_Functions[1].PositionFixed);
+                    CL = BCs_Functions[2].BoundaryFunction((t + 1), dt, BCs_Functions[2].PositionVaries, BCs_Functions[2].PositionFixed);
                     
                     //TridiagonalMatrix B_row2;
                     for (int k = 0; k < NY; k++)
@@ -641,7 +641,7 @@ namespace Diffusion2D_Library
                     switch (BCs_Functions[0].TypeBC)
                     {
                         case ABoundaryCondition.dirichlet:
-                            CT = BCs_Functions[0].BoundaryFunction(t * dt, BCs_Functions[0].PositionVaries, BCs_Functions[0].PositionFixed);
+                            CT = BCs_Functions[0].BoundaryFunction(t, dt, BCs_Functions[0].PositionVaries, BCs_Functions[0].PositionFixed);
                             C_Im2.ReplaceRow(CT, nrows - 1);
                             break;
                         case ABoundaryCondition.neumann:
@@ -665,7 +665,7 @@ namespace Diffusion2D_Library
                     switch (BCs_Functions[3].TypeBC)
                     {
                         case ABoundaryCondition.dirichlet:
-                            CB = BCs_Functions[3].BoundaryFunction(t * dt, BCs_Functions[3].PositionVaries, BCs_Functions[3].PositionFixed);
+                            CB = BCs_Functions[3].BoundaryFunction(t, dt, BCs_Functions[3].PositionVaries, BCs_Functions[3].PositionFixed);
                             C_Im2.ReplaceRow(CB, 0);
                             break;
                         case ABoundaryCondition.neumann:
