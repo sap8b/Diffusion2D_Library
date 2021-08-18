@@ -506,8 +506,19 @@ namespace Diffusion2D_Library
                             Console.WriteLine("{0}s have been simulated", time);
                             full_file_name = Base_filename + time.ToString() + suffix;
                             if (File.Exists(full_file_name)) { File.Delete(full_file_name); }
-                            if (t == 0) { FileWriteData_CSV(full_file_name, X, Y, C_Initial); }
-                            else { FileWriteData_CSV(full_file_name, X, Y, C_Im2); }
+                            if (t == 0) { FileWriteConcentrationData_CSV(full_file_name, X, Y, C_Initial); }
+                            else { FileWriteConcentrationData_CSV(full_file_name, X, Y, C_Im2); }
+                        }
+                    }
+                    else if (Chat_mode == Mode.quiet && output_interval > 0 && Base_filename != null)
+                    {
+                        if (t % output_interval == 0)
+                        {
+                            decimal time = (decimal)(t * dt);
+                            full_file_name = Base_filename + time.ToString() + suffix;
+                            if (File.Exists(full_file_name)) { File.Delete(full_file_name); }
+                            if (t == 0) { FileWriteConcentrationData_CSV(full_file_name, X, Y, C_Initial); }
+                            else { FileWriteConcentrationData_CSV(full_file_name, X, Y, C_Im2); }
                         }
                     }
 

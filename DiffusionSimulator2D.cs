@@ -182,7 +182,7 @@ namespace Diffusion2D_Library
         /// <param name="of">Filename</param>
         /// <param name="x">Position</param>
         /// <param name="c">Composition</param>
-        public static void FileWriteData_CSV(string of, RMatrix x, RMatrix y, RMatrix c)
+        public static void FileWriteConcentrationData_CSV(string of, RMatrix x, RMatrix y, RMatrix c)
         {
             string check_dir = Path.GetDirectoryName(of);
             string owd;
